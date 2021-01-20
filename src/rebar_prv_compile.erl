@@ -35,6 +35,7 @@ init(State) ->
 
 -spec do(rebar_state:t()) -> {ok, rebar_state:t()} | {error, string()}.
 do(State) ->
+    {ok, Value} = eprof:profile(fun() ->
     IsDepsOnly = is_deps_only(State),
     rebar_paths:set_paths([deps], State),
 
@@ -53,7 +54,11 @@ do(State) ->
 
     rebar_paths:set_paths([plugins], State1),
 
-    {ok, State1}.
+    {ok, State1}
+    end),
+    eprof:log("analysis.txt"),
+    eprof:analyze(total),
+    Value.
 
 is_deps_only(State) ->
     {Args, _} = rebar_state:command_parsed_args(State),
